@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "prod": "ng build --aot=true --prod",
-    "test": "ng test",
+    "config": "ts-node set-env.ts",
+    "start": "npm run config && ng serve -o",
+    "build": "npm run config && ng build",
+    "test": "npm run config && ng test",
+    "prod": "npm run config && ng build --aot=true --prod",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
@@ -22,7 +23,9 @@
     "@angular/router": "~10.0.0",
     "rxjs": "~6.5.5",
     "tslib": "^2.0.0",
-    "zone.js": "~0.10.3"
+    "zone.js": "~0.10.3",
+    "colors": "^1.1.2",
+    "dotenv": "^5.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1000.0",
@@ -40,8 +43,8 @@
     "karma-jasmine": "~3.3.0",
     "karma-jasmine-html-reporter": "^1.5.0",
     "protractor": "~7.0.0",
-    "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
-    "typescript": "~3.9.5"
+    "typescript": "~3.9.5",
+    "ts-node": "~5.0.1"
   }
 }
