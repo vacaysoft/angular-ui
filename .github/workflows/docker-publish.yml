@@ -20,6 +20,13 @@ jobs:
         KEY: apiEndpoint
         VALUE: https://vacaysoft-api-develop.azurewebsites.net/
         FILE: src/environments/environment.prod.ts
+        
+    - name: manifest Version
+      uses: deef0000dragon1/json-edit-action/@v1
+      env:
+        KEY: apiEndpoint
+        VALUE: https://vacaysoft-api-develop.azurewebsites.net/
+        FILE: src/environments/environment.ts
     
     - name: 'Build and push image'
       uses: azure/docker-login@v1
