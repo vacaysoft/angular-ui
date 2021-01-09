@@ -19,7 +19,7 @@ jobs:
     - name: Update environment
       run: npm run config
       env:
-        API_ENDPOINT: https://vacaysoft-api-develop.azurewebsites.net
+        API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
         
     - name: NG Build
       run: npm run prod        
