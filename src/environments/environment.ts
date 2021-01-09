@@ -1,4 +1,4 @@
 export const environment = {
-   production: 'false',
-   apiEndpoint: 'a-wonderful-application'
+   production: 'undefined',
+   apiEndpoint: 'https://localhost:8443'
 };

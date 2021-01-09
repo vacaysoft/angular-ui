@@ -7,7 +7,7 @@
     "start": "npm run config && ng serve -o",
     "build": "npm run config && ng build",
     "test": "npm run config && ng test",
-    "prod": "npm run config && ng build --aot=true --prod",
+    "prod": "ng build --aot=true --prod",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
