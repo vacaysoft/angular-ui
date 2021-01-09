@@ -12,11 +12,15 @@ jobs:
     steps:
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@main
-          
+
+    - name: Restore packages
+      run: npm ci
+      
+    - name: Update environment
+      run: npm run config
+
     - name: 'Build and push image'
       uses: azure/docker-login@v1
-      env:
-        API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
       with:
         login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
         username: ${{ secrets.REGISTRY_USERNAME }}
