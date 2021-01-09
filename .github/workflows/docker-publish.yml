@@ -3,65 +3,70 @@ name: Publish Docker Image
 on:
   push:
     # Publish `master` as Docker `latest` image.
-    branches:
-      - develop
-      - staging
-      - production
-
-env:
-  # TODO: Change variable to your image's name.
-  IMAGE_NAME: vacaysoft-ng
-
-jobs:
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
-  push:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-
-    steps:
-      - uses: actions/checkout@v2
-      
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "##[set-output name=branch;]$(echo $(echo ${GITHUB_REF#refs/heads/}))"
-        id: extract_branch
-          
-      - name: Build image
-        run: docker build . --file Dockerfile.${{ steps.extract_branch.outputs.branch }} --tag $IMAGE_NAME
-
-      - name: Log into GitHub Container Registry
-        run: echo "${{ secrets.CR_PAT }}" | docker login -u taipan-pr --password-stdin ghcr.io
+    branches: master
     
-      - name: Push image to GitHub Container Registry
-        run: |
-          IMAGE_ID=ghcr.io/vacaysoft/$IMAGE_NAME/$IMAGE_NAME
+jobs:
+  build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+    # checkout the repo
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@main
+      
+    - name: manifest Version
+      uses: deef0000dragon1/json-edit-action/@v1
+      env:
+        KEY: apiEndpoint
+        VALUE: https://vacaysoft-api-develop.azurewebsites.net/
+        FILE: src/environments/environment.prod.ts
+        
+    - name: manifest Version
+      uses: deef0000dragon1/json-edit-action/@v1
+      env:
+        KEY: apiEndpoint
+        VALUE: https://vacaysoft-api-develop.azurewebsites.net/
+        FILE: src/environments/environment.ts
+    
+    - name: 'Build and push image'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: |
+        docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:0.0.${{ github.run_number }} -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:latest
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular
 
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+  develop:
+      needs: build
+      name: Deploy to Development
+      environment: 
+        name: Develop
+        url: https://vacaysoft-ng-develop.azurewebsites.net
+      runs-on: ubuntu-latest
+      steps:
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-          echo IMAGE_ID=$IMAGE_ID
-          docker tag $IMAGE_NAME $IMAGE_ID:${{ steps.extract_branch.outputs.branch }}
-          docker push $IMAGE_ID:${{ steps.extract_branch.outputs.branch }}
-          
-      - name: WebHook Trigger (Develop)
-        if: ${{ steps.extract_branch.outputs.branch == 'develop' }}
-        uses: fjogeleit/http-request-action@master
+      - name: Azure WebApp
+        uses: Azure/webapps-deploy@v2
         with:
-            url: '${{ secrets.AZURE_DEV_WEBHOOK }}'
-            method: 'POST'
+          # Name of the Azure Web App
+          app-name: vacaysoft-ng
+          # Applies to Web Apps(Windows and Linux) and Web App Containers(linux). Multi container scenario not supported. Publish profile (*.publishsettings) file contents with Web Deploy secrets
+          publish-profile: ${{ secrets.PUBLISHING_PROFILE }} # optional
+          # Enter an existing Slot other than the Production slot
+          slot-name: develop # optional, default is production
+          # Applies to Web App only: Path to package or folder. *.zip, *.war, *.jar or a folder to deploy
+          #package: # optional, default is .
+          # Applies to Web App Containers only: Specify the fully qualified container image(s) name. For example, 'myregistry.azurecr.io/nginx:latest' or 'python:3.7.2-alpine/'. For multi-container scenario multiple container image names can be provided (multi-line separated)
+          images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:latest
+          # Applies to Web App Containers only: Path of the Docker-Compose file. Should be a fully qualified path or relative to the default working directory. Required for multi-container scenario
+          #configuration-file: # optional
+          # Enter the start up command. For ex. dotnet run or dotnet run
+          #startup-command: # optional
+
           
-      - name: WebHook Trigger (Staging)
-        if: ${{ steps.extract_branch.outputs.branch == 'staging' }}
-        uses: fjogeleit/http-request-action@master
-        with:
-            url: '${{ secrets.AZURE_STG_WEBHOOK }}'
-            method: 'POST'
-          
-      - name: WebHook Trigger (Production)
-        if: ${{ steps.extract_branch.outputs.branch == 'production' }}
-        uses: fjogeleit/http-request-action@master
-        with:
-            url: '${{ secrets.AZURE_PROD_WEBHOOK }}'
-            method: 'POST'
