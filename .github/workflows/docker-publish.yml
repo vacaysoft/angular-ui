@@ -18,7 +18,12 @@ jobs:
       
     - name: Update environment
       run: npm run config
-
+      env:
+        API_ENDPOINT: https://vacaysoft-api-develop.azurewebsites.net
+        
+    - name: NG Build
+      run: npm run prod        
+      
     - name: 'Build and push image'
       uses: azure/docker-login@v1
       with:
