@@ -1,9 +1,8 @@
 # Stage 1
-FROM node:current-alpine as build
+FROM node:12.20.1-alpine3.12 as build
 RUN mkdir -p /app
 WORKDIR /app
 COPY package.json /app
-COPY ng-uikit-pro-standard-10.0.0.tgz /app
 RUN npm install
 COPY . /app
 RUN npm run build
