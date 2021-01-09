@@ -117,7 +117,7 @@ jobs:
 
   production:
     name: Deploy to Production
-    needs: [develop]
+    needs: [staging]
     environment: 
       name: develop
       url: https://vacaysoft-ng.azurewebsites.net
