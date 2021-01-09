@@ -7,10 +7,10 @@ on:
     
 jobs:
   develop:
+    name: Deploy to Develop
     environment: 
       name: develop
       url: https://vacaysoft-ng-develop.azurewebsites.net
-    name: Docker Build
     runs-on: ubuntu-latest
     steps:
     - name: 'Checkout GitHub Action'
@@ -25,7 +25,7 @@ jobs:
         API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
         
     - name: build
-      run: npm run prod        
+      run: npm run prod
       
     - name: 'Build and push image'
       uses: azure/docker-login@v1
@@ -35,7 +35,7 @@ jobs:
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - run: |
         docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular-develop:0.0.${{ github.run_number }} -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular-develop:latest
-        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular-develop
 
     - name: 'Login via Azure CLI'
       uses: azure/login@v1
