@@ -14,20 +14,13 @@ jobs:
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@main
       
-    - name: Set JSON Field
-      # You may pin to the exact commit or the version.
-      # uses: jossef/action-set-json-field@6e6d7e639f24b3955ef682815317b5613ac6ca12
-      uses: jossef/action-set-json-field@v1
-      with:
-        # file name/path to edit. e.g 'package.json'
-        file: src/environments/environment.prod.ts
-        # field to edit. can be nested fields. e.g 'version' or 'metadata.scripts.build'
-        field: apiEndpoint
-        # value to set. string. e.g. 'v1.2.3'
-        value: https://vacaysoft-api-develop.azurewebsites.net/
-        # optional. if set to any non-empty value will parse the data in 'value' field to JSON
-        #parse_json: # optional, default is 
-
+    - name: manifest Version
+      uses: deef0000dragon1/json-edit-action/@v1
+      env:
+        KEY: apiEndpoint
+        VALUE: https://vacaysoft-api-develop.azurewebsites.net/
+        FILE: src/environments/environment.prod.ts
+    
     - name: 'Build and push image'
       uses: azure/docker-login@v1
       with:
