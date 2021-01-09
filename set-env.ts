@@ -24,6 +24,6 @@ writeFile(targetProdPath, envConfigFile, function(err) {
   if (err) {
     throw console.error(err);
   } else {
-    console.log(colors.magenta(`Angular environment.ts file generated correctly at ${ targetPath } \n`));
+    console.log(colors.magenta(`Angular environment.prod.ts file generated correctly at ${ targetPath } \n`));
   }
 });
