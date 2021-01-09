@@ -34,8 +34,8 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - run: |
-        docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular-develop:0.0.${{ github.run_number }} -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular-develop:latest
-        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular-develop
+        docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:develop-0.0.${{ github.run_number }}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:develop-0.0.${{ github.run_number }}
 
     - name: 'Login via Azure CLI'
       uses: azure/login@v1
@@ -54,7 +54,117 @@ jobs:
         # Applies to Web App only: Path to package or folder. *.zip, *.war, *.jar or a folder to deploy
         #package: # optional, default is .
         # Applies to Web App Containers only: Specify the fully qualified container image(s) name. For example, 'myregistry.azurecr.io/nginx:latest' or 'python:3.7.2-alpine/'. For multi-container scenario multiple container image names can be provided (multi-line separated)
-        images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular-develop:latest
+        images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:develop-0.0.${{ github.run_number }}
+        # Applies to Web App Containers only: Path of the Docker-Compose file. Should be a fully qualified path or relative to the default working directory. Required for multi-container scenario
+        #configuration-file: # optional
+        # Enter the start up command. For ex. dotnet run or dotnet run
+        #startup-command: # optional
+
+  staging:
+    name: Deploy to Staging
+    needs: [develop]
+    environment: 
+      name: develop
+      url: https://vacaysoft-ng-staging.azurewebsites.net
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@main
+
+    - name: Restore packages
+      run: npm ci
+      
+    - name: Update environment
+      run: npm run config
+      env:
+        API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
+        
+    - name: build
+      run: npm run prod
+      
+    - name: 'Build and push image'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: |
+        docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:staging-0.0.${{ github.run_number }}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:staging-0.0.${{ github.run_number }}
+
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Azure WebApp
+      uses: Azure/webapps-deploy@v2
+      with:
+        # Name of the Azure Web App
+        app-name: vacaysoft-ng
+        # Applies to Web Apps(Windows and Linux) and Web App Containers(linux). Multi container scenario not supported. Publish profile (*.publishsettings) file contents with Web Deploy secrets
+        publish-profile: ${{ secrets.PUBLISHING_PROFILE }} # optional
+        # Enter an existing Slot other than the Production slot
+        slot-name: staging # optional, default is production
+        # Applies to Web App only: Path to package or folder. *.zip, *.war, *.jar or a folder to deploy
+        #package: # optional, default is .
+        # Applies to Web App Containers only: Specify the fully qualified container image(s) name. For example, 'myregistry.azurecr.io/nginx:latest' or 'python:3.7.2-alpine/'. For multi-container scenario multiple container image names can be provided (multi-line separated)
+        images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:staging-0.0.${{ github.run_number }}
+        # Applies to Web App Containers only: Path of the Docker-Compose file. Should be a fully qualified path or relative to the default working directory. Required for multi-container scenario
+        #configuration-file: # optional
+        # Enter the start up command. For ex. dotnet run or dotnet run
+        #startup-command: # optional
+
+  production:
+    name: Deploy to Production
+    needs: [develop]
+    environment: 
+      name: develop
+      url: https://vacaysoft-ng.azurewebsites.net
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@main
+
+    - name: Restore packages
+      run: npm ci
+      
+    - name: Update environment
+      run: npm run config
+      env:
+        API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
+        
+    - name: build
+      run: npm run prod
+      
+    - name: 'Build and push image'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: |
+        docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:0.0.${{ github.run_number }} -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:latest
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:latest
+
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Azure WebApp
+      uses: Azure/webapps-deploy@v2
+      with:
+        # Name of the Azure Web App
+        app-name: vacaysoft-ng
+        # Applies to Web Apps(Windows and Linux) and Web App Containers(linux). Multi container scenario not supported. Publish profile (*.publishsettings) file contents with Web Deploy secrets
+        publish-profile: ${{ secrets.PUBLISHING_PROFILE }} # optional
+        # Enter an existing Slot other than the Production slot
+        #slot-name: # optional, default is production
+        # Applies to Web App only: Path to package or folder. *.zip, *.war, *.jar or a folder to deploy
+        #package: # optional, default is .
+        # Applies to Web App Containers only: Specify the fully qualified container image(s) name. For example, 'myregistry.azurecr.io/nginx:latest' or 'python:3.7.2-alpine/'. For multi-container scenario multiple container image names can be provided (multi-line separated)
+        images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:latest
         # Applies to Web App Containers only: Path of the Docker-Compose file. Should be a fully qualified path or relative to the default working directory. Required for multi-container scenario
         #configuration-file: # optional
         # Enter the start up command. For ex. dotnet run or dotnet run
