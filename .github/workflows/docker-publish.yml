@@ -13,21 +13,7 @@ jobs:
     # checkout the repo
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@main
-      
-    - name: manifest Version
-      uses: deef0000dragon1/json-edit-action/@v1
-      env:
-        KEY: apiEndpoint
-        VALUE: https://vacaysoft-api-develop.azurewebsites.net/
-        FILE: src/environments/environment.prod.ts
-        
-    - name: manifest Version
-      uses: deef0000dragon1/json-edit-action/@v1
-      env:
-        KEY: apiEndpoint
-        VALUE: https://vacaysoft-api-develop.azurewebsites.net/
-        FILE: src/environments/environment.ts
-    
+          
     - name: 'Build and push image'
       uses: azure/docker-login@v1
       with:
@@ -37,6 +23,8 @@ jobs:
     - run: |
         docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:0.0.${{ github.run_number }} -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:latest
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular
+    - env:
+        API_ENDPOINT: https://vacaysoft-api-develop.azurewebsites.net
 
   develop:
       needs: build
