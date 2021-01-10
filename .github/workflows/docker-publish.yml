@@ -13,7 +13,7 @@ jobs:
       url: https://vacaysoft-ng-develop.azurewebsites.net
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout GitHub Action'
+    - name: Checkout GitHub Action
       uses: actions/checkout@main
 
     - name: Restore packages
@@ -24,10 +24,10 @@ jobs:
       env:
         API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
         
-    - name: build
+    - name: Build
       run: npm run prod
       
-    - name: 'Build and push image'
+    - name: Build and push image
       uses: azure/docker-login@v1
       with:
         login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
@@ -37,12 +37,12 @@ jobs:
         docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:develop-0.0.${{ github.run_number }}
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:develop-0.0.${{ github.run_number }}
 
-    - name: 'Login via Azure CLI'
+    - name: Login via Azure CLI
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Azure WebApp
+    - name: Deploy to Azure WebApp
       uses: Azure/webapps-deploy@v2
       with:
         # Name of the Azure Web App
@@ -68,7 +68,7 @@ jobs:
       url: https://vacaysoft-ng-staging.azurewebsites.net
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout GitHub Action'
+    - name: Checkout GitHub Action
       uses: actions/checkout@main
 
     - name: Restore packages
@@ -79,10 +79,10 @@ jobs:
       env:
         API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
         
-    - name: build
+    - name: Build
       run: npm run prod
       
-    - name: 'Build and push image'
+    - name: Build and push image
       uses: azure/docker-login@v1
       with:
         login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
@@ -92,7 +92,7 @@ jobs:
         docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:staging-0.0.${{ github.run_number }}
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:staging-0.0.${{ github.run_number }}
 
-    - name: 'Login via Azure CLI'
+    - name: Login via Azure CLI
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -123,7 +123,7 @@ jobs:
       url: https://vacaysoft-ng.azurewebsites.net
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout GitHub Action'
+    - name: Checkout GitHub Action
       uses: actions/checkout@main
 
     - name: Restore packages
@@ -134,10 +134,10 @@ jobs:
       env:
         API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
         
-    - name: build
+    - name: Build
       run: npm run prod
       
-    - name: 'Build and push image'
+    - name: Build and push image
       uses: azure/docker-login@v1
       with:
         login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
@@ -147,7 +147,7 @@ jobs:
         docker build . --file Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:0.0.${{ github.run_number }} -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:latest
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vacaysoft-angular:latest
 
-    - name: 'Login via Azure CLI'
+    - name: Login via Azure CLI
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
